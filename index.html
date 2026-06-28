@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LLM Workspace</title>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
+            display: flex;
+            height: 90vh;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 280px;
+            border-right: 1px solid #e0e0e0;
+            padding: 20px;
+            overflow-y: auto;
+            background: #fafbfc;
+            scrollbar-width: thin;
+            scrollbar-color: #ccc transparent;
+        }
+
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            overflow: hidden;
+        }
+
+        .header {
+            margin-bottom: 16px;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 12px;
+        }
+
+        .header h1 {
+            font-size: 22px;
+            color: #1a1a1a;
+            margin-bottom: 4px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 12px;
+        }
+
+        .section-title {
+            font-size: 11px;
+            font-weight: 700;
+            color: #888;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin: 18px 0 10px;
+        }
+
+        .mode-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .mode-button {
+            padding: 9px 12px;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            text-align: left;
+            color: #333;
+            transition: all 0.15s;
+        }
+
+        .mode-button:hover {
+            background: #f0f0f0;
+            border-color: #bbb;
+        }
+
+        .mode-button.active {
+            background: #4a90e2;
+            color: white;
+            border-color: #4a90e2;
+        }
+
+        .mode-button .desc {
+            font-size: 10px;
+            opacity: 0.7;
+            margin-top: 2px;
+        }
+
+        .control-group {
+            margin-bottom: 14px;
+        }
+
+        .control-label {
+            font-size: 11px;
+            font-weight: 600;
+            color: #555;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        select,
+        textarea {
+            width: 100%;
+            padding: 7px 9px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 12px;
+            font-family: inherit;
+            background: white;
+        }
+
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #4a90e2;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 90px;
+            font-family: 'Courier New', monospace;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 4px;
+            cursor: pointer;
+            accent-color: #4a90e2;
+        }
+
+        .control-hint {
+            font-size: 10px;
+            color: #aaa;
+            margin-top: 3px;
+        }
+
+        .preset-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+        }
+
+        .preset-btn {
+            padding: 7px 6px;
+            font-size: 11px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.15s;
+            color: #444;
+        }
+
+        .preset-btn:hover {
+            background: #f0f0f0;
+            border-color: #999;
+        }
+
+        .format-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 6px;
+        }
+
+        .format-opt {
+            padding: 7px;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 11px;
+            text-align: center;
+            transition: all 0.15s;
+            color: #444;
+        }
+
+        .format-opt:hover {
+            background: #f0f0f0;
+        }
+
+        .format-opt.active {
+            background: #4a90e2;
+            color: white;
+            border-color: #4a90e2;
+        }
+
+        .btn-row {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid #ddd;
+            background: white;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            color: #333;
+            transition: all 0.15s;
+        }
+
+        .btn:hover {
+            background: #f0f0f0;
+            border-color: #999;
+        }
+
+        .btn-danger {
+            width: 100%;
+            margin-top: 16px;
+            padding: 8px;
+            background: #fff0f0;
+            color: #c33;
+            border: 1px solid #f5caca;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .btn-danger:hover {
+            background: #ffe0e0;
+        }
+
+        .stats-card {
+            background: white;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px;
+            padding: 12px;
+            margin-top: 16px;
+        }
+
+        .stats-label {
+            font-size: 10px;
+            color: #aaa;
+            margin-bottom: 4px;
+        }
+
+        .stats-value {
+            font-size: 22px;
+            font-weight: 700;
+            color: #4a90e2;
+        }
+
+        .stats-sub {
+            font-size: 10px;
+            color: #aaa;
+            margin-top: 3px;
+        }
+
+        /* Chat area */
+        .chat-container {
+            flex: 1;
+            overflow-y: auto;
+            margin-bottom: 12px;
+            padding-right: 6px;
+            scrollbar-width: thin;
+            scrollbar-color: #ccc transparent;
+        }
+
+        .message {
+            margin-bottom: 12px;
+            display: flex;
+            animation: slideIn 0.25s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.user {
+            justify-content: flex-end;
+        }
+
+        .bubble {
+            max-width: 72%;
+            padding: 10px 13px;
+            border-radius: 8px;
+            font-size: 13px;
+            line-height: 1.55;
+            word-break: break-word;
+            white-space: pre-wrap;
+        }
+
+        .message.user .bubble {
+            background: #4a90e2;
+            color: white;
+        }
+
+        .message.assistant .bubble {
+            background: #f2f2f2;
+            color: #222;
+            border: 1px solid #e0e0e0;
+        }
+
+        .bubble-meta {
+            font-size: 10px;
+            margin-top: 5px;
+            opacity: 0.6;
+        }
+
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100%;
+            color: #bbb;
+            gap: 8px;
+        }
+
+        .empty-icon {
+            font-size: 44px;
+        }
+
+        .loading-dots {
+            display: flex;
+            gap: 5px;
+            padding: 10px 14px;
+        }
+
+        .loading-dots span {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #bbb;
+            display: inline-block;
+            animation: bounce 1.4s infinite;
+        }
+
+        .loading-dots span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .loading-dots span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes bounce {
+
+            0%,
+            80%,
+            100% {
+                transform: translateY(0);
+                opacity: 0.4;
+            }
+
+            40% {
+                transform: translateY(-6px);
+                opacity: 1;
+            }
+        }
+
+        .input-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        .input-row textarea {
+            flex: 1;
+            min-height: 80px;
+            max-height: 180px;
+            resize: vertical;
+            font-family: inherit;
+            font-size: 13px;
+        }
+
+        .send-btn {
+            padding: 0 18px;
+            background: #4a90e2;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 600;
+            transition: background 0.15s;
+            align-self: stretch;
+        }
+
+        .send-btn:hover:not(:disabled) {
+            background: #357abd;
+        }
+
+        .send-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .flash {
+            padding: 9px 12px;
+            border-radius: 5px;
+            font-size: 12px;
+            margin-bottom: 10px;
+        }
+
+        .flash.error {
+            background: #fff0f0;
+            border: 1px solid #f5caca;
+            color: #c33;
+        }
+
+        .flash.success {
+            background: #f0fff0;
+            border: 1px solid #b6e8b6;
+            color: #2a7a2a;
+        }
+
+        /* API key screen */
+        .key-screen {
+            max-width: 500px;
+            margin: 80px auto;
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12);
+        }
+
+        .key-screen h1 {
+            font-size: 26px;
+            margin-bottom: 6px;
+        }
+
+        .key-screen p {
+            color: #666;
+            margin-bottom: 24px;
+            font-size: 13px;
+        }
+
+        .key-screen label {
+            display: block;
+            font-weight: 600;
+            font-size: 13px;
+            margin-bottom: 8px;
+        }
+
+        .key-input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 13px;
+            font-family: monospace;
+            margin-bottom: 8px;
+        }
+
+        .key-input:focus {
+            outline: none;
+            border-color: #4a90e2;
+        }
+
+        .key-note {
+            font-size: 11px;
+            color: #999;
+            margin-bottom: 20px;
+        }
+
+        .key-note a {
+            color: #4a90e2;
+        }
+
+        .key-submit {
+            width: 100%;
+            padding: 12px;
+            background: #4a90e2;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .key-submit:hover {
+            background: #357abd;
+        }
+
+        .info-box {
+            background: #f0f7ff;
+            border: 1px solid #c8e0ff;
+            border-radius: 6px;
+            padding: 12px 14px;
+            margin-top: 16px;
+            font-size: 12px;
+            color: #1a5fa8;
+            line-height: 1.5;
+        }
+    </style>
+
+
+</head>
+
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useRef, useEffect } = React;
+
+        // Token cost per 1k tokens (input/output blended estimate) by model
+        const MODEL_COSTS = {
+            'claude-opus-4-6': 0.015,
+            'claude-sonnet-4-6': 0.003,
+            'claude-haiku-4-5-20251001': 0.00025,
+        };
+
+        const estimateTokens = (text) => Math.ceil((text || '').length / 4);
+
+        function LLMWorkspace() {
+            // ── API key state ──────────────────────────────────────────────
+            const storedKey = (() => { try { return localStorage.getItem('llm-api-key') || ''; } catch { return ''; } })();
+            const [apiKey, setApiKey] = useState(storedKey);
+            const [keyDraft, setKeyDraft] = useState(storedKey);
+            const [showKeyScreen, setShowKeyScreen] = useState(!storedKey);
+
+            // ── Workspace state ────────────────────────────────────────────
+            const [mode, setMode] = useState('chat');
+            const [messages, setMessages] = useState([]);
+            const [input, setInput] = useState('');
+            const [systemPrompt, setSystemPrompt] = useState('You are a helpful AI assistant with expertise across many domains.');
+            const [temperature, setTemperature] = useState(0.7);
+            const [topP, setTopP] = useState(0.9);
+            const [maxTokens, setMaxTokens] = useState(1000);
+            const [model, setModel] = useState('claude-sonnet-4-6');
+            const [responseFormat, setResponseFormat] = useState('text');
+            const [loading, setLoading] = useState(false);
+            const [tokenCount, setTokenCount] = useState(0);
+            const [error, setError] = useState('');
+            const [flash, setFlash] = useState('');
+
+            const chatEndRef = useRef(null);
+
+            useEffect(() => {
+                chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+            }, [messages, loading]);
+
+            // ── Flash helper ───────────────────────────────────────────────
+            const showFlash = (msg) => {
+                setFlash(msg);
+                setTimeout(() => setFlash(''), 2500);
+            };
+
+            // ── Save API key ───────────────────────────────────────────────
+            const saveApiKey = () => {
+                const trimmed = keyDraft.trim();
+                if (!trimmed) { setError('API key cannot be empty.'); return; }
+                try { localStorage.setItem('llm-api-key', trimmed); } catch { }
+                setApiKey(trimmed);
+                setShowKeyScreen(false);
+                setError('');
+            };
+
+            // ── Send message ───────────────────────────────────────────────
+            const handleSend = async () => {
+                if (!input.trim() || loading) return;
+                setError('');
+
+                const userMsg = {
+                    role: 'user',
+                    content: input.trim(),
+                    timestamp: new Date().toLocaleTimeString(),
+                };
+
+                // Build history for multi-turn chat
+                const history = mode === 'chat'
+                    ? [...messages, userMsg].map(({ role, content }) => ({ role, content }))
+                    : [{ role: 'user', content: userMsg.content }];
+
+                setMessages(prev => [...prev, userMsg]);
+                setInput('');
+                setLoading(true);
+
+                try {
+                    const res = await fetch('https://api.anthropic.com/v1/messages', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'x-api-key': apiKey,
+                            'anthropic-version': '2023-06-01',
+                            'anthropic-dangerous-direct-browser-access': 'true',
+                        },
+                        body: JSON.stringify({
+                            model,
+                            max_tokens: parseInt(maxTokens),
+                            temperature: parseFloat(temperature),
+                            top_p: parseFloat(topP),
+                            system: systemPrompt,
+                            messages: history,
+                        }),
+                    });
+
+                    if (!res.ok) {
+                        const errData = await res.json().catch(() => ({}));
+                        throw new Error(errData?.error?.message || `API error ${res.status}`);
+                    }
+
+                    const data = await res.json();
+                    let text = data?.content?.[0]?.text ?? '(empty response)';
+
+                    // Apply response format transforms
+                    if (responseFormat === 'markdown') {
+                        text = '```markdown\n' + text + '\n```';
+                    } else if (responseFormat === 'json') {
+                        try { text = JSON.stringify(JSON.parse(text), null, 2); }
+                        catch { text = '[JSON parse error]\n' + text; }
+                    } else if (responseFormat === 'summary') {
+                        text = '📋 Summary\n\n' + (text.length > 500 ? text.slice(0, 500) + '…' : text);
+                    }
+
+                    const usedTokens =
+                        (data?.usage?.input_tokens ?? estimateTokens(userMsg.content)) +
+                        (data?.usage?.output_tokens ?? estimateTokens(text));
+
+                    const assistantMsg = {
+                        role: 'assistant',
+                        content: text,
+                        timestamp: new Date().toLocaleTimeString(),
+                        tokens: usedTokens,
+                    };
+
+                    setMessages(prev => [...prev, assistantMsg]);
+                    setTokenCount(prev => prev + usedTokens);
+                    showFlash(`Response generated · ${usedTokens} tokens`);
+
+                } catch (err) {
+                    setError(err.message);
+                    setMessages(prev => [...prev, {
+                        role: 'assistant',
+                        content: `❌ ${err.message}`,
+                        timestamp: new Date().toLocaleTimeString(),
+                    }]);
+                } finally {
+                    setLoading(false);
+                }
+            };
+
+            // ── Keyboard shortcut ──────────────────────────────────────────
+            const handleKeyDown = (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSend();
+                }
+            };
+
+            // ── Utility actions ────────────────────────────────────────────
+            const clearConversation = () => {
+                if (!window.confirm('Clear all messages? This cannot be undone.')) return;
+                setMessages([]);
+                setTokenCount(0);
+                showFlash('Conversation cleared');
+            };
+
+            const exportChat = () => {
+                const md = [
+                    '# LLM Conversation Export',
+                    `**Model:** ${model}  |  **Date:** ${new Date().toLocaleString()}`,
+                    '',
+                    '---',
+                    '',
+                    ...messages.map(m =>
+                        `**${m.role.toUpperCase()}** _(${m.timestamp})_${m.tokens ? ` · ${m.tokens} tokens` : ''}\n\n${m.content}`
+                    ),
+                ].join('\n\n');
+
+                const url = URL.createObjectURL(new Blob([md], { type: 'text/markdown' }));
+                const a = Object.assign(document.createElement('a'), { href: url, download: `chat-${Date.now()}.md` });
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                URL.revokeObjectURL(url);
+                showFlash('Conversation exported');
+            };
+
+            const applyPreset = (preset) => {
+                const presets = {
+                    creative: { temperature: 1.2, topP: 0.95, system: 'You are a creative writing assistant. Generate imaginative, engaging content.' },
+                    technical: { temperature: 0.2, topP: 0.80, system: 'You are an expert programmer. Provide accurate, efficient code and clear explanations.' },
+                    analytical: { temperature: 0.4, topP: 0.85, system: 'You are a data analyst. Provide clear, evidence-based analysis.' },
+                    balanced: { temperature: 0.7, topP: 0.90, system: 'You are a helpful AI assistant with expertise across many domains.' },
+                };
+                const p = presets[preset];
+                if (!p) return;
+                setTemperature(p.temperature);
+                setTopP(p.topP);
+                setSystemPrompt(p.system);
+                showFlash(`"${preset}" preset applied`);
+            };
+
+            const switchMode = (m) => {
+                setMode(m);
+                setMessages([]);
+                setTokenCount(0);
+            };
+
+            // ── Cost estimate ──────────────────────────────────────────────
+            const costEst = ((tokenCount * (MODEL_COSTS[model] ?? 0.003)) / 1000).toFixed(4);
+
+            // ══════════════════════════════════════════════════════════════
+            // API KEY SCREEN
+            // ══════════════════════════════════════════════════════════════
+            if (showKeyScreen) {
+                return (
+                    <div className="key-screen">
+                        <h1>🚀 LLM Workspace</h1>
+                        <p>Enter your Anthropic API key to get started.</p>
+
+                        {error && <div className="flash error">{error}</div>}
+
+                        <label htmlFor="apiKeyInput">Anthropic API Key</label>
+                        <input
+                            id="apiKeyInput"
+                            type="password"
+                            className="key-input"
+                            value={keyDraft}
+                            onChange={e => setKeyDraft(e.target.value)}
+                            onKeyDown={e => e.key === 'Enter' && saveApiKey()}
+                            placeholder="sk-ant-..."
+                            autoFocus
+                        />
+                        <div className="key-note">
+                            Get your key at{' '}
+                            <a href="https://console.anthropic.com" target="_blank" rel="noopener noreferrer">
+                                console.anthropic.com
+                            </a>
+                        </div>
+
+                        <button className="key-submit" onClick={saveApiKey}>Save &amp; Continue →</button>
+
+                        <div className="info-box">
+                            <strong>Privacy:</strong> Your API key is stored only in this browser's local storage and is sent directly to the Anthropic API — nowhere else.
+                        </div>
+                    </div>
+                );
+            }
+
+            // ══════════════════════════════════════════════════════════════
+            // MAIN WORKSPACE
+            // ══════════════════════════════════════════════════════════════
+            const modeLabel = { chat: '💬 Chat', completion: '✏️ Completion', analysis: '📊 Analysis' };
+            const placeholder = {
+                chat: 'Ask anything… (Enter to send, Shift+Enter for newline)',
+                completion: 'Enter text to complete…',
+                analysis: 'Paste content to analyse…',
+            }[mode];
+
+            return (
+                <div className="container">
+
+                    {/* ── SIDEBAR ─────────────────────────────────────── */}
+                    <div className="sidebar">
+
+                        <div className="section-title">Mode</div>
+                        <div className="mode-buttons">
+                            {[
+                                { id: 'chat', emoji: '💬', desc: 'Multi-turn conversation' },
+                                { id: 'completion', emoji: '✏️', desc: 'Single-shot text generation' },
+                                { id: 'analysis', emoji: '📊', desc: 'Analyse pasted content' },
+                            ].map(m => (
+                                <button
+                                    key={m.id}
+                                    className={`mode-button ${mode === m.id ? 'active' : ''}`}
+                                    onClick={() => switchMode(m.id)}
+                                >
+                                    {m.emoji} {m.id.charAt(0).toUpperCase() + m.id.slice(1)}
+                                    <div className="desc">{m.desc}</div>
+                                </button>
+                            ))}
+                        </div>
+
+                        <div className="section-title">Model</div>
+                        <div className="control-group">
+                            <select value={model} onChange={e => setModel(e.target.value)}>
+                                <option value="claude-opus-4-6">Claude Opus 4.6 — Most capable</option>
+                                <option value="claude-sonnet-4-6">Claude Sonnet 4.6 — Balanced</option>
+                                <option value="claude-haiku-4-5-20251001">Claude Haiku 4.5 — Fastest</option>
+                            </select>
+                        </div>
+
+                        <div className="section-title">Parameters</div>
+
+                        <div className="control-group">
+                            <label className="control-label">Temperature: {temperature.toFixed(2)}</label>
+                            <input
+                                type="range" min="0" max="2" step="0.05"
+                                value={temperature}
+                                onChange={e => setTemperature(parseFloat(e.target.value))}
+                            />
+                            <div className="control-hint">0 = deterministic · 2 = very creative</div>
+                        </div>
+
+                        <div className="control-group">
+                            <label className="control-label">Top-P: {topP.toFixed(2)}</label>
+                            <input
+                                type="range" min="0" max="1" step="0.05"
+                                value={topP}
+                                onChange={e => setTopP(parseFloat(e.target.value))}
+                            />
+                            <div className="control-hint">Nucleus sampling breadth</div>
+                        </div>
+
+                        <div className="control-group">
+                            <label className="control-label">Max tokens: {maxTokens}</label>
+                            <input
+                                type="range" min="100" max="4000" step="100"
+                                value={maxTokens}
+                                onChange={e => setMaxTokens(parseInt(e.target.value))}
+                            />
+                        </div>
+
+                        <div className="section-title">Presets</div>
+                        <div className="preset-buttons">
+                            {['creative', 'technical', 'analytical', 'balanced'].map(p => (
+                                <button key={p} className="preset-btn" onClick={() => applyPreset(p)}>
+                                    {p.charAt(0).toUpperCase() + p.slice(1)}
+                                </button>
+                            ))}
+                        </div>
+
+                        <div className="section-title">Response Format</div>
+                        <div className="format-grid">
+                            {['text', 'markdown', 'json', 'summary'].map(f => (
+                                <div
+                                    key={f}
+                                    className={`format-opt ${responseFormat === f ? 'active' : ''}`}
+                                    onClick={() => setResponseFormat(f)}
+                                >
+                                    {f.charAt(0).toUpperCase() + f.slice(1)}
+                                </div>
+                            ))}
+                        </div>
+
+                        <div className="section-title">System Prompt</div>
+                        <textarea
+                            value={systemPrompt}
+                            onChange={e => setSystemPrompt(e.target.value)}
+                            placeholder="Set the AI's behaviour and persona…"
+                        />
+
+                        <div className="btn-row">
+                            <button className="btn" onClick={clearConversation}>🗑 Clear</button>
+                            <button className="btn" onClick={exportChat}>⬇ Export</button>
+                        </div>
+
+                        <div className="stats-card">
+                            <div className="stats-label">Tokens used this session</div>
+                            <div className="stats-value">{tokenCount.toLocaleString()}</div>
+                            <div className="stats-sub">Messages: {messages.length}</div>
+                            <div className="stats-sub">Est. cost: ${costEst}</div>
+                        </div>
+
+                        <button
+                            className="btn-danger"
+                            onClick={() => {
+                                try { localStorage.removeItem('llm-api-key'); } catch { }
+                                setApiKey('');
+                                setKeyDraft('');
+                                setShowKeyScreen(true);
+                            }}
+                        >
+                            🔐 Change API Key
+                        </button>
+
+                    </div>
+
+                    {/* ── MAIN CONTENT ─────────────────────────────────── */}
+                    <div className="main-content">
+
+                        <div className="header">
+                            <h1>{modeLabel[mode]} Mode</h1>
+                            <p>
+                                {model} · temp {temperature.toFixed(2)} · top-p {topP.toFixed(2)} · max {maxTokens} tokens
+                            </p>
+                        </div>
+
+                        {error && <div className="flash error">⚠ {error}</div>}
+                        {flash && !error && <div className="flash success">✓ {flash}</div>}
+
+                        <div className="chat-container">
+                            {messages.length === 0 ? (
+                                <div className="empty-state">
+                                    <div className="empty-icon">{['💬', '✏️', '📊'][['chat', 'completion', 'analysis'].indexOf(mode)]}</div>
+                                    <div>
+                                        {mode === 'chat' && 'Start a conversation…'}
+                                        {mode === 'completion' && 'Enter text to complete…'}
+                                        {mode === 'analysis' && 'Paste content to analyse…'}
+                                    </div>
+                                </div>
+                            ) : (
+                                <>
+                                    {messages.map((msg, i) => (
+                                        <div key={i} className={`message ${msg.role}`}>
+                                            <div className="bubble">
+                                                {msg.content}
+                                                <div className="bubble-meta">
+                                                    {msg.timestamp}{msg.tokens ? ` · ${msg.tokens} tokens` : ''}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+
+                                    {loading && (
+                                        <div className="message assistant">
+                                            <div className="loading-dots">
+                                                <span /><span /><span />
+                                            </div>
+                                        </div>
+                                    )}
+
+                                    <div ref={chatEndRef} />
+                                </>
+                            )}
+                        </div>
+
+                        <div className="input-row">
+                            <textarea
+                                value={input}
+                                onChange={e => setInput(e.target.value)}
+                                onKeyDown={handleKeyDown}
+                                placeholder={placeholder}
+                                disabled={loading}
+                            />
+                            <button
+                                className="send-btn"
+                                onClick={handleSend}
+                                disabled={loading || !input.trim()}
+                            >
+                                {loading ? '⏳' : '📤'} Send
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<LLMWorkspace />);
+    </script>
+</body>
+
+</html>
