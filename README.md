@@ -342,11 +342,3 @@ To improve this project:
 - [Console](https://console.anthropic.com)
 
 ---
-
-**Last Updated**: 2024  
-**Maintained By**: Community  
-**Status**: Active Development
-
-
-good moring sir my slef ankush i am from gurugram haryna i am very hardable and senicer student i ensure you i  waill able to do work with you  
-and never dispposnated be your attention i am very happay with your work  i have match but my jhatu team mate never do grid and always make excuse and thing that they become a espoarts payer jhantu  palayer i will play because no one konw what happend to with your life and sadden become somting and chnge your life ..now if they are not online thats show they are not prepare beacuse onne of thhem havvw one child 
