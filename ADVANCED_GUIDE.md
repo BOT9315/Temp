@@ -7,7 +7,6 @@ Professional techniques and strategies for power users of the LLM Workspace.
 ### 1. Chain-of-Thought Prompting
 
 **Concept**: Force the AI to show its reasoning step-by-step
-
 **Basic Example**:
 ```
 User Prompt: "Solve this problem: If a train travels 100 miles in 2 hours,
