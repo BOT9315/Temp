@@ -1,5 +1,5 @@
 # API Reference Guide
-..................
+.................
 Complete technical documentation for the LLM Workspace's API integration with Anthropic Claude.
 
 ## 📡 API Endpoints
