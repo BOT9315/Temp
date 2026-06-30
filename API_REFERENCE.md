@@ -1,5 +1,5 @@
 # API Reference Guide
-
+..
 Complete technical documentation for the LLM Workspace's API integration with Anthropic Claude.
 
 ## 📡 API Endpoints
@@ -8,7 +8,6 @@ Complete technical documentation for the LLM Workspace's API integration with An
 ```
 POST https://api.anthropic.com/v1/messages
 ```
-
 ### Authentication
 ```
 Header: x-api-key: YOUR_API_KEY
