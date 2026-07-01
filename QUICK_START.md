@@ -12,7 +12,7 @@ Get up and running in 5 minutes. Detailed guides are available in README.md, ADV
 1. Visit https://console.anthropic.com
 2. Sign up or log in
 3. Go to API Keys
-4. Cre
+4. Crea
 5. Copy the key (starts with `sk-ant-`)
 
 ### Step 3: Open Application (30 seconds)
