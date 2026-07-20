@@ -3,10 +3,6 @@ elj
 sdsd
 ee
 d
-dsd
-sd
-asdasewewe
-ewew
 wewwe
 eweweew
 
