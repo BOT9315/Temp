@@ -1,8 +1,7 @@
 e
 elj
 
-ewewe
-e
+ewe
 e
 we
 
