@@ -2,5 +2,3 @@
 
 j
 hk
-ghjk
-hjk
