@@ -1,4 +1,3 @@
 qwertyuiop[asdfghjkl
 fgh
-fgh
-gghjk
+fg
