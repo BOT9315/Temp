@@ -1,3 +1,3 @@
 qwertyuiop[asdfghjkl
 sdfghjkbn
-zxcvbnm,asd
+zxcvbnm
