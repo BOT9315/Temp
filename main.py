@@ -1,3 +1,2 @@
 qwertyuiop[asdfghjkl
 sdfghjkbn
-zxcvbnm
