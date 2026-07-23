@@ -3,6 +3,5 @@ dfgas
 db
 fghj
 dfg
-ghjkvbn
-fghbnm
+ghj
 bbn
