@@ -1,6 +1,5 @@
 asdfgh
-fgh
-fghj
+fg
 fghj
 fgh
 ghjk
